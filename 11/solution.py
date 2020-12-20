@@ -72,12 +72,7 @@ def are_grids_different(grid1, grid2):
     return False
     
 def count_occupied_seats(grid):
-    count = 0
-    for row in range(len(grid)):
-        for column in range(len(grid[row])):
-            if grid[row][column] == '#':
-                count += 1
-    return count
+    return sum([1 for row in grid for entry in row if entry == '#'])
     
 def process_until_stable(grid, move_func, occupied_tolerance):
     grid_processed = process_grid(grid, move_func, occupied_tolerance)
