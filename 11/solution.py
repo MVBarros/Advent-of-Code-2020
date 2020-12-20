@@ -8,14 +8,6 @@ def load_input(path):
     with open(path, 'r') as fd:
         return [line[:-1] for line in fd] # -1 needed here to remove trailling newline
 
-def get_adjacent_values(val, max_val):
-    adj_val = {val-1, val, val+1}
-    if val == 0:
-        adj_val.remove(val-1)
-    elif val == max_val:
-        adj_val.remove(val+1)
-    return adj_val
-
 def get_grid_limits(grid):
     return (len(grid) - 1, len(grid[0]) - 1)
 
