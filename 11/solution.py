@@ -1,7 +1,3 @@
-import copy
-import itertools
-import functools
-
 ORTOGONAL_DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, -1), (1, -1), (-1, 1)]
 
 def load_input(path):
