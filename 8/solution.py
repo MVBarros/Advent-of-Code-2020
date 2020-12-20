@@ -65,8 +65,8 @@ def replace_line_instr(program, line_no, new_instr):
     return program
 
 def test_corruption(program, matching_func, replace_instruction):
-    jmp_lines = get_matching_lines(program, matching_func)
-    for line_no in jmp_lines:
+    matching_lines = get_matching_lines(program, matching_func)
+    for line_no in matching_lines:
         new_program = replace_line_instr(program, line_no, replace_instruction)
         state = exec(new_program)
         if has_program_terminated(new_program, state):

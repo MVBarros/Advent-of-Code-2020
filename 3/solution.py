@@ -8,11 +8,11 @@ def find_slope_solution(input, step_x, step_y):
     num_trees = 0
     curr_x, curr_y = (0,0)
     num_lines = len(input)
-    num_collumns = len(input[0])
+    num_columns = len(input[0])
     while curr_y < num_lines:
         if input[curr_y][curr_x] == '#':
             num_trees += 1
-        curr_x = (curr_x + step_x) % num_collumns
+        curr_x = (curr_x + step_x) % num_columns
         curr_y += step_y
     return num_trees    
 
