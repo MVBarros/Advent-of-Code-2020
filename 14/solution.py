@@ -16,7 +16,7 @@ class Mask:
 
 class MemInstruction:
     def __init__(self, lval, rval):
-        self.__addr = int(lval[4:-1])
+        self.__addr = f'{int(lval[4:-1]):036b}'
         self.__val = f'{int(rval):036b}'
 
     def exec(self, state):
