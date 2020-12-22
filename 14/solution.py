@@ -42,7 +42,7 @@ class AddrMask(AbstractMask):
         for i, char in enumerate(val):
             if char == 'X':
                 prefixes = [val[:i] + '0',  val[:i] + '1']
-                suffixes = [s for s in self._get_all_possible_addrs(val[i+1:])]
+                suffixes = self._get_all_possible_addrs(val[i+1:])
                 return [val for val in itertools.product(prefixes, suffixes)]
         return [val]
 
