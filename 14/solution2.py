@@ -17,9 +17,9 @@ class Mask:
     def _get_all_possible_addrs(self, val):
         for i, char in enumerate(val):
             if char == 'X':
-                val_zero = s = val[:i] + '0' + val[i + 1:]
-                val_one = s = val[:i] + '1' + val[i + 1:]
-                return self._get_all_possible_addrs(val_zero) + self._get_all_possible_addrs(val_one)   
+                prefixes = [val[:i] + '0',  val[:i] + '1']
+                suffixes = [s for s in self._get_all_possible_addrs(val[i+1:])]
+                return [val for val in itertools.product(prefixes, suffixes)]
         return [val]
 
 class MemInstruction:
