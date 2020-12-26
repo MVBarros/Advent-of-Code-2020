@@ -1,8 +1,16 @@
 import operator
 
+def lex_expression(expression: str) -> list:
+    expression = expression.replace(' ', '')
+    return [char for char in expression]
+    
+def parse_input(path: str) -> list:
+    with open(path, 'r') as fd:
+        return [lex_expression(line[:-1]) for line in fd]
+
 def is_token_val(token):
     return '1' <= token <= '9'
- 
+
 class PostfixEvaluator:
     operator_lookup = {'+': operator.add, '*': operator.mul}
 
@@ -63,14 +71,6 @@ class ShuntingYard:
         while len(self.__op_stack) != 0:
             self._pop_top_operator_onto_out()
         return self.__out
-
-def lex_expression(expression: str) -> list:
-    expression = expression.replace(' ', '')
-    return [char for char in expression]
-    
-def parse_input(path: str) -> list:
-    with open(path, 'r') as fd:
-        return [lex_expression(line[:-1]) for line in fd]
 
 res = 0
 
