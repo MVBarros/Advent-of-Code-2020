@@ -77,7 +77,7 @@ tiles = collections.Counter([walk_line(line) for line in lines])
 print(count_black(tiles))
 
 for i in range(0, 100):
-    # remove white tiles
+    # remove white tiles, only need to check around black tiles
     tiles = collections.Counter([tile for tile, val in tiles.items() if val % 2 ]) 
     flip_ground(tiles)
     
