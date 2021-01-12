@@ -37,32 +37,36 @@ def get_floor_bounds(tiles):
 def get_adjacent_pos(pos):
     return ((pos[0] + vector[0], pos[1] + vector[1], pos[2] + vector[2]) for vector in vector_list)
     
-def get_next_pos(min_coord, max_coord):
-    for x in range(min_coord[0], max_coord[0]):
-        for y in range(min_coord[1], max_coord[1]):
-            for z in range(min_coord[2], max_coord[2]):
-                yield (x, y, z)
 
 def check_white(tiles, pos, flips):
     adj = get_adjacent_pos(pos)
     num_blacks = sum((1 for pos in adj if tiles[pos] % 2))
     if num_blacks == 2:
-        flips.append(pos)
+        flips.add(pos)
     
 def check_black(tiles, pos, flips):
     adj = get_adjacent_pos(pos)
     num_blacks = sum((1 for pos in adj if tiles[pos] % 2))
     if num_blacks == 0 or num_blacks > 2:
-        flips.append(pos)
-    
+        flips.add(pos)
+
+def check_pos(tile, pos, flips, visited):
+    if pos in visited:
+        return
+    visited.add(pos)
+    if not tiles[pos] % 2:
+        check_white(tiles, pos, flips)
+    else:
+        check_black(tiles, pos, flips) 
+
 def flip_ground(tiles):
-    min_coord, max_coord = get_floor_bounds(tiles)
-    flips = list()
-    for pos in get_next_pos(min_coord, max_coord):
-        if not tiles[pos] % 2:
-            check_white(tiles, pos, flips)
-        else:
-            check_black(tiles, pos, flips)
+    visited = set()
+    flips = set()
+    for pos in tiles:
+        for adj_pos in get_adjacent_pos(pos):
+            check_pos(tiles, adj_pos, flips, visited)
+        check_pos(tiles, pos, flips, visited)
+
     for pos in flips:
         tiles[pos] += 1
 
@@ -78,11 +82,10 @@ def count_black(tiles):
 lines = parse_input('input.txt')
 
 tiles = collections.Counter([walk_line(line) for line in lines])
-
 print(count_black(tiles))
 
-
 for i in range(0, 100):
+    tiles = collections.Counter([tile for tile, val in tiles.items() if val % 2 ])
     flip_ground(tiles)
     
 print(count_black(tiles))
