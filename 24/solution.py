@@ -26,18 +26,9 @@ def walk_line(line: str) -> tuple:
     steps = get_steps(line)
     return functools.reduce(lambda x, y: (x[0] + y[0], x[1] + y[1], x[2] + y[2]), steps, (0, 0, 0))
 
-def get_floor_bounds(tiles):
-    x_coords = {tile[0] for tile in tiles}
-    y_coords = {tile[1] for tile in tiles}
-    z_coords = {tile[2] for tile in tiles}
-    min_coord = (min(x_coords) - 1, min(y_coords) - 1, min(z_coords) - 1)
-    max_coord = (max(x_coords) + 2, max(y_coords) + 2, max(z_coords) + 2)
-    return min_coord, max_coord
-
 def get_adjacent_pos(pos):
     return ((pos[0] + vector[0], pos[1] + vector[1], pos[2] + vector[2]) for vector in vector_list)
     
-
 def check_white(tiles, pos, flips):
     adj = get_adjacent_pos(pos)
     num_blacks = sum((1 for pos in adj if tiles[pos] % 2))
@@ -54,10 +45,11 @@ def check_pos(tile, pos, flips, visited):
     if pos in visited:
         return
     visited.add(pos)
-    if not tiles[pos] % 2:
-        check_white(tiles, pos, flips)
+
+    if tiles[pos] % 2:
+        check_black(tiles, pos, flips)
     else:
-        check_black(tiles, pos, flips) 
+        check_white(tiles, pos, flips) 
 
 def flip_ground(tiles):
     visited = set()
@@ -85,7 +77,8 @@ tiles = collections.Counter([walk_line(line) for line in lines])
 print(count_black(tiles))
 
 for i in range(0, 100):
-    tiles = collections.Counter([tile for tile, val in tiles.items() if val % 2 ])
+    # remove white tiles
+    tiles = collections.Counter([tile for tile, val in tiles.items() if val % 2 ]) 
     flip_ground(tiles)
     
 print(count_black(tiles))
