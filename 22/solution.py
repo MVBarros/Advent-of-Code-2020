@@ -1,7 +1,7 @@
 import copy
 
 class Player:
-    def __init__(self, name: str, deck: list):
+    def __init__(self, name: int, deck: list):
         self.name = name
         self.deck = deck
 
@@ -31,7 +31,7 @@ class Player:
         return total
 
 class Combat:
-    def __init__(self, players: set):
+    def __init__(self, players: list):
         self.players = players
     
     def is_finished(self) -> bool:
@@ -54,10 +54,9 @@ class Combat:
         return sum((player.sum() for player in self.players))
 
 class RecursiveCombat(Combat):
-    def __init__(self, players: set, num=1):
+    def __init__(self, players: list):
         self.players = players
         self.past_states = set()
-        self.num = num
         
     def is_finished(self) -> bool:
         return len(self.players) == 1
@@ -83,23 +82,18 @@ class RecursiveCombat(Combat):
                 played_cards.sort(reverse=True)
                 winner.win(played_cards)
                 return        
-        winner_name = self.play_subgame(plays)
-        for player in self.players:
-            if player.name == winner_name:
-                winner = player
-        played_cards = [plays[winner]]
-        for player in self.players:
-            if player.name != winner_name:
-                played_cards.append(plays[player])
+        winner = self.play_subgame(plays)
+        played_cards = [plays[winner]] + [plays[player] for player in self.players if player.name != winner.name]
         winner.win(played_cards)
         
     def play_subgame(self, plays):
-        player_copies = list()
-        for player, cards in plays.items():
-            new_player = Player(player.name, player.deck[:cards])
-            player_copies.append(new_player)
-        subgame = RecursiveCombat(player_copies, self.num + 1)
-        return subgame.play().name
+        player_copies = [Player(player.name, player.deck[0:card]) for player, card in plays.items()]
+        subgame = RecursiveCombat(player_copies)
+        winner_name = subgame.play().name
+        for player in self.players:
+            if player.name == winner_name:
+                return player
+        
             
     def sum(self) -> int:
         return sum((player.sum() for player in self.players))
@@ -111,23 +105,23 @@ class RecursiveCombat(Combat):
 def parse_player(deck: str) -> Player:
     name, *cards = deck.split('\n')
     cards = [int(card) for card in cards]
-    name = name[:-1] # remove ':' at end of player name
+    name = int(name[-2]) - 1 # index of list
     return Player(name, cards)
 
 
-def parse_input(path:str) -> set:
+def parse_input(path:str) -> list:
     with open(path, 'r') as fd:
         players = fd.read().split('\n\n')
-        return {parse_player(player) for player in players}
+        return [parse_player(player) for player in players]
+
 players = parse_input('input.txt')
 
 game = Combat(copy.deepcopy(players))
-
 game.play()
 
-game = RecursiveCombat(players)
+print(game.sum())
 
+game = RecursiveCombat(copy.deepcopy(players))
 game.play()
-
 
 print(game.sum())
