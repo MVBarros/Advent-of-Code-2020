@@ -1,14 +1,12 @@
-import copy
-
 def parse_input(path: str) -> list:
     with open(path, 'r') as f:
         return [int(cup) for cup in f.read()]
 
 def get_successors(successors, begin, num):
-    cups = []
+    cups = [0] * num
     current = successors[begin]
     for i in range(num):
-        cups.append(current)
+        cups[i] = current
         current = successors[current]
     return cups
 
