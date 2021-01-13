@@ -78,11 +78,11 @@ class RecursiveCombat(Combat):
                 break
         if winner is None:      
             winner = self.play_subgame(plays)
-        winning_play = plays[winner.name]
-        winner.win([winning_play] + [play for play in plays if play != winning_play])
+        winning_card = plays[winner.name]
+        winner.win([winning_card] + [card for card in plays if card != winning_card])
         
     def play_subgame(self, plays):
-        subgame_players = [Player(player.name, player.deck[0:plays[player.name]]) for player in self.players]
+        subgame_players = [Player(player.name, player.deck[:plays[player.name]]) for player in self.players]
         subgame = RecursiveCombat(subgame_players)
         winner = subgame.play()
         return self.players[winner.name]
