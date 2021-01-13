@@ -11,19 +11,16 @@ def get_successors(successors, begin, num):
     return cups
 
 def get_destination(current_cup, pick_up, num_cups):
-    destination_cup = current_cup - 1
-    if destination_cup == 0:
-        destination_cup = num_cups    
-    while destination_cup in pick_up:
-        destination_cup -= 1
-        if destination_cup == 0:
-            destination_cup = num_cups
+    destination_cup = (current_cup - 1) % num_cups
+    while destination_cup in pick_up or destination_cup == 0:
+        destination_cup = (destination_cup - 1) % num_cups
     return destination_cup
     
 def move(successors, current_cup):
-    *pick_up, next_cup = get_successors(successors, current_cup, 4)
-    
-    destination_cup = get_destination(current_cup, pick_up, len(successors) - 1)
+    pick_up = get_successors(successors, current_cup, 3)
+    next_cup = successors[pick_up[2]]
+
+    destination_cup = get_destination(current_cup, pick_up, len(successors))
     
     successors[current_cup] = next_cup
     successors[pick_up[2]] = successors[destination_cup]
