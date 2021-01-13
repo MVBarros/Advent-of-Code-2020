@@ -23,32 +23,53 @@ def get_cup_idx(cups, val):
 def remove_pickup(cups, pick_up):
     return [cup for cup in cups if cup not in pick_up]
 
-def move(cups, idx):
-    pick_up = get_pickup(cups, idx)
-    pickup_set = set(pick_up)
+def get_successors(successors, begin, num):
+    cups = []
+    current = successors[begin]
+    for i in range(num):
+        cups.append(current)
+        current = successors[current]
+    return cups
+
+def get_destination(current_cup, pick_up, num_cups):
+    destination_cup = current_cup - 1
+    if destination_cup == 0:
+        destination_cup = num_cups    
+    while destination_cup in pick_up:
+        destination_cup -= 1
+        if destination_cup == 0:
+            destination_cup = num_cups
+    return destination_cup
     
-    next_idx = (idx + len(pick_up) + 1) % len(cups)
-
-    current_cup, next_cup = cups[idx], cups[next_idx]
-
-    destination = get_destination(cups, current_cup, pickup_set)
-    cups = remove_pickup(cups, pickup_set)
-    destination_idx = get_cup_idx(cups, destination)
-    cups = cups[:destination_idx + 1] + pick_up + cups[destination_idx + 1:]
-
-    return (cups, next_cup)
+def move(successors, current_cup):
+    *pick_up, next_cup = get_successors(successors, current_cup, 4)
+    
+    destination_cup = get_destination(current_cup, pick_up, len(successors) - 1)
+    
+    successors[current_cup] = next_cup
+    successors[pick_up[2]] = successors[destination_cup]
+    successors[destination_cup] = pick_up[0]
+    return next_cup
     
 def game(cups, rounds):
-    idx = 0
-    count = 0
-    while count < rounds:
-        cups, next_cup = move(cups, idx)
-        idx = get_cup_idx(cups, next_cup)
-        count += 1
-    return cups
-        
-        
-cups = parse_input('input.txt')
-cups = game(cups, 100)
+    cup_size = len(cups)
+    successors = [0] * (cup_size + 1)
+    for i in range(0, cup_size):
+        successors[cups[i]] = cups[(i + 1) % cup_size]
+    current_cup = cups[0]
 
-print(cups)
+    for i in range(rounds):
+       current_cup = move(successors, current_cup)
+    return successors
+
+cups = parse_input('input.txt')
+successors = game(cups, 100)
+
+print(get_successors(successors, 1, 8))
+
+for i in range(len(cups), 1000000):
+    cups.append(i + 1)
+
+successors = game(cups, 10000000)
+
+print(get_successors(successors, 1, 2))
