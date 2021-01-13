@@ -57,9 +57,6 @@ class RecursiveCombat(Combat):
     def __init__(self, players: list):
         self.players = players
         self.past_states = set()
-        
-    def is_finished(self) -> bool:
-        return len(self.players) == 1
 
     def play(self) -> Player:
         while not self.is_finished():
@@ -73,31 +70,23 @@ class RecursiveCombat(Combat):
         return self.players[0]
 
     def round(self):
-        plays = {player : player.play() for player in self.players}
+        plays = [player.play() for player in self.players]
         winner = None
-        for player, card in plays.items():
-            if card > player.deck_size():
-                winner = max(plays, key=plays.get)
-                played_cards = list(plays.values())
-                played_cards.sort(reverse=True)
-                winner.win(played_cards)
-                return        
-        winner = self.play_subgame(plays)
-        played_cards = [plays[winner]] + [plays[player] for player in self.players if player.name != winner.name]
-        winner.win(played_cards)
+        for name, card in enumerate(plays):
+            if card > self.players[name].deck_size():
+                winner = self.players[plays.index(max(plays))] # max draw
+                break
+        if winner is None:      
+            winner = self.play_subgame(plays)
+        winning_play = plays[winner.name]
+        winner.win([winning_play] + [play for play in plays if play != winning_play])
         
     def play_subgame(self, plays):
-        player_copies = [Player(player.name, player.deck[0:card]) for player, card in plays.items()]
-        subgame = RecursiveCombat(player_copies)
-        winner_name = subgame.play().name
-        for player in self.players:
-            if player.name == winner_name:
-                return player
-        
+        subgame_players = [Player(player.name, player.deck[0:plays[player.name]]) for player in self.players]
+        subgame = RecursiveCombat(subgame_players)
+        winner = subgame.play()
+        return self.players[winner.name]
             
-    def sum(self) -> int:
-        return sum((player.sum() for player in self.players))
-
     def state(self) -> str:
         return "".join([str(player) for player in self.players])
 
