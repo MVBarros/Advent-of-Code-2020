@@ -4,25 +4,6 @@ def parse_input(path: str) -> list:
     with open(path, 'r') as f:
         return [int(cup) for cup in f.read()]
 
-def get_destination(cups, current, pick_up):
-    destination = current - 1
-    while destination in pick_up or destination == 0:
-        if destination == 0:
-            destination = len(cups)
-        else:
-            destination = (destination - 1) % len(cups)
-    return destination
-
-def get_pickup(cups, idx):
-    num_cups = len(cups)
-    return [cups[(idx + n) % num_cups] for n in (1, 2, 3)]
-    
-def get_cup_idx(cups, val):
-    return cups.index(val)
-
-def remove_pickup(cups, pick_up):
-    return [cup for cup in cups if cup not in pick_up]
-
 def get_successors(successors, begin, num):
     cups = []
     current = successors[begin]
