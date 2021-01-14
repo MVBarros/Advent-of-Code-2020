@@ -5,6 +5,12 @@ import random
 DRAGON_WIDTH = 20
 DRAGON_HEIGHT = 3
 
+DRAGON = [
+'                  # ', \
+'#    ##    ##    ###', \
+' #  #  #  #  #  #   '  \
+]
+
 class Tile:
     contrary_sides = {'top': 'bot', 'bot': 'top', 'left': 'right', 'right': 'left'}
     flipped_sides = {'top': 'bot', 'bot': 'top', 'left': 'left', 'right': 'right'}
@@ -160,7 +166,7 @@ def iterate_image_segments(image: list):
             segment = []
             for ii in range(DRAGON_HEIGHT):
                 segment.append(image[i + ii][j:j+DRAGON_WIDTH])
-            yield segment
+            yield (segment, i, j)
             
 
 def iterate_possible_images(tiles: list):
@@ -181,12 +187,22 @@ def print_image(image: list):
 def get_borders(connection_map: dict) -> list:
     return [tile for tile, connections in connection_map.items() if len(connections) == 2]
 
-'''
-                  # 
-#    ##    ##    ###
- #  #  #  #  #  #   
-'''
+def is_segment_dragon(segment):
+    for i, line in enumerate(segment):
+        for j, char in enumerate(line):
+            if DRAGON[i][j] == '#' and char not in ('#', 'O'):
+                return False
+    return True
 
+def mark_dragon(image, i, j):
+    for ii, line in enumerate(DRAGON):
+        for jj, char in enumerate(line):
+            if char == '#':
+                image[i + ii] = image[i + ii][:j + jj] + 'O' + image[i + ii][j + jj + 1:] 
+                
+    return image
+
+    
 tiles = parse_input('input.txt')
 
 connection_map = get_connections(tiles)
@@ -197,10 +213,25 @@ print(functools.reduce(lambda x, y: x * y, map(lambda x: x.number, border_tiles)
 
 connect_tiles(connection_map)
 
+correct_image = None
+
+# correct image orientation is first image  with dragon
 for image in iterate_possible_images(tiles):
-    print_image(image)
-    print('\n')
-    for segment in iterate_image_segments(image):
-        print_image(segment)
-        print('\n')
-    
+    for segment, _, _ in iterate_image_segments(image):
+        if is_segment_dragon(segment):
+            correct_image = image
+            break
+
+for segment, i, j in iterate_image_segments(correct_image):
+    if is_segment_dragon(segment):
+        correct_image = mark_dragon(image, i, j)
+
+print_image(correct_image)
+
+count = 0
+
+for line in correct_image:
+    for char in line:
+        if char == '#':
+            count+= 1
+print(count)
