@@ -49,6 +49,9 @@ class Tile:
                 return
             self.rotate(set())
 
+    def rotate_image(self):
+        self.image = ["".join(line) for line in zip(*self.image[::-1])]
+
     def rotate(self, visited):
         if self in visited:
             return
@@ -58,12 +61,17 @@ class Tile:
         self.bounds['top'] = self.bounds['top'][::-1]
         self.bounds['bot'] = self.bounds['bot'][::-1]
         
+        self.rotate_image()
+
         self.neighbours = {Tile.rotated_sides[side]: neighbour for side, neighbour in self.neighbours.items()}
         for neighbour in self.neighbours.values():
             if neighbour is not None:
                 neighbour.rotate(visited)
         return
     
+    def flip_image(self):
+        self.image = self.image[::-1]
+
     def flip(self, visited):
         if self in visited:
             return
@@ -73,6 +81,8 @@ class Tile:
         self.bounds['left'] = self.bounds['left'][::-1]
         self.bounds['right'] = self.bounds['right'][::-1]
         
+        self.flip_image()
+
         self.neighbours = {Tile.flipped_sides[side]: neighbour for side, neighbour in self.neighbours.items()}
         for neighbour in self.neighbours.values():
             if neighbour is not None:
@@ -82,6 +92,10 @@ class Tile:
     def __repr__(self):
         return str(self.number)
 
+    def print_image(self):
+        for line in self.image:
+            print(line)
+        
 def parse_tile(tile: str) -> Tile:
     name, *image = tile.split('\n') 
     return Tile(name, image)
@@ -117,7 +131,8 @@ print(functools.reduce(lambda x, y: x * y, map(lambda x: x.number, border_tiles)
 
 connect_tiles(connection_map)
 
-tiles[0].flip(set())
+# tiles[0].flip(set())
 
 for tile in tiles:
     print(f'tile:{tile.number}, neighbours: {tile.neighbours}')
+    
