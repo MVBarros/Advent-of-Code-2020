@@ -2,16 +2,19 @@ import itertools
 import functools
 import random
 
+DRAGON_WIDTH = 20
+DRAGON_HEIGHT = 3
+
 class Tile:
     contrary_sides = {'top': 'bot', 'bot': 'top', 'left': 'right', 'right': 'left'}
     flipped_sides = {'top': 'bot', 'bot': 'top', 'left': 'left', 'right': 'right'}
     rotated_sides = {'top': 'right', 'right': 'bot', 'bot': 'left', 'left': 'top'}
     def __init__(self, name: str, image: list):
         self.number = int(name[-6:-1])
-        self.image = image
-        self.bounds = {'top': self.image[0], 'bot': self.image[-1]}
-        self.bounds['left'] = "".join(line[0] for line in self.image)
-        self.bounds['right'] = "".join(line[-1] for line in self.image)
+        self.image = [line[1:-1] for line in image[1:-1]]
+        self.bounds = {'top': image[0], 'bot': image[-1]}
+        self.bounds['left'] = "".join(line[0] for line in image)
+        self.bounds['right'] = "".join(line[-1] for line in image)
         self.possible_bounds = set()
         for bound in self.bounds.values():
             self.possible_bounds.add(bound)
@@ -118,8 +121,71 @@ def connect_tiles(connection_map: dict):
         for connection in connections:
             tile.connect(connection)
 
+def get_top_left_tile(tiles: list):
+    current = tiles[0]
+    while current.neighbours['left'] is not None:
+        current = current.neighbours['left']
+    while current.neighbours['top'] is not None:
+        current = current.neighbours['top']
+    return current
+    
+def iterate_lines(source: Tile):
+    while source is not None:
+        yield source
+        source = source.neighbours['bot']
+
+def iterate_columns(source: Tile):
+    while source is not None:
+        yield source
+        source = source.neighbours['right']
+
+
+def reconstruct_image(tiles: list):
+    image = []
+    source = get_top_left_tile(tiles)
+    for line in iterate_lines(source):
+        line_images = []
+        for tile in iterate_columns(line):
+            line_images.append(tile.image)
+        image_line = ["".join(line) for line in zip(*line_images)]
+        image += image_line
+        #image.append("".join(image_line))
+    return image
+
+def iterate_image_segments(image: list):
+    image_width = len(image[0])
+    image_height = len(image)
+    for i in range(image_height - DRAGON_HEIGHT):
+        for j in range(image_width - DRAGON_WIDTH + 1):
+            segment = []
+            for ii in range(DRAGON_HEIGHT):
+                segment.append(image[i + ii][j:j+DRAGON_WIDTH])
+            yield segment
+            
+
+def iterate_possible_images(tiles: list):
+    for i in range(4):
+        yield reconstruct_image(tiles)
+        tiles[0].rotate(set())
+    
+    tiles[0].flip(set())
+
+    for i in range(4):
+        yield reconstruct_image(tiles)
+        tiles[0].rotate(set())
+
+def print_image(image: list):
+    for line in image:
+        print(line)    
+
 def get_borders(connection_map: dict) -> list:
     return [tile for tile, connections in connection_map.items() if len(connections) == 2]
+
+'''
+                  # 
+#    ##    ##    ###
+ #  #  #  #  #  #   
+'''
 
 tiles = parse_input('input.txt')
 
@@ -131,8 +197,10 @@ print(functools.reduce(lambda x, y: x * y, map(lambda x: x.number, border_tiles)
 
 connect_tiles(connection_map)
 
-# tiles[0].flip(set())
-
-for tile in tiles:
-    print(f'tile:{tile.number}, neighbours: {tile.neighbours}')
+for image in iterate_possible_images(tiles):
+    print_image(image)
+    print('\n')
+    for segment in iterate_image_segments(image):
+        print_image(segment)
+        print('\n')
     
